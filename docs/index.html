@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Windfall Protocol — Demo · A 90-Day Command System for New Money</title>
+<meta name="description" content="A 90-day command system for a lump sum: inheritance, bonus, settlement, or business sale. Freeze, shield, kill the debt, allocate — in that order.">
+<meta name="theme-color" content="#0C231A">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png">
+<style>
+  :root{
+    --bg:#0C231A; --bg2:#081A12; --panel:#122A1F; --panel2:#0E241A;
+    --line:rgba(180,154,91,.38); --line-soft:rgba(180,154,91,.18);
+    --gold:#B49A5B; --gold2:#D8C08A; --ivory:#F3EDDC; --muted:#A9B59C;
+    --red:#C96A5A; --redbg:#2E1A14; --green:#8FBF7A; --ink:#0A1B13;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:radial-gradient(1100px 600px at 50% -80px, #17402C 0%, var(--bg) 55%, var(--bg2) 100%);
+    color:var(--ivory); font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    line-height:1.55; padding:18px 14px 60px;
+  }
+  .wrap{max-width:1060px; margin:0 auto;}
+  h1,h2,h3,.serif{font-family:Georgia,"Times New Roman",serif;}
+  /* ---------- demo chrome ---------- */
+  .demo-banner,.demo-close{display:none;}
+  body.demo .demo-banner{
+    display:block; position:sticky; top:0; z-index:50; text-align:center;
+    background:repeating-linear-gradient(45deg,#B49A5B 0 18px,#9A8148 18px 36px);
+    color:#14231A; font-weight:800; letter-spacing:.14em; font-size:.8rem;
+    padding:9px 10px; border-bottom:2px solid #6E5A2E; text-transform:uppercase;
+  }
+  body.demo .demo-close{
+    display:block; border:1px solid var(--gold); background:var(--panel);
+    padding:22px; margin-top:22px; text-align:center;
+  }
+  body.demo .full-only{display:none !important;}
+  /* ---------- hero ---------- */
+  .hero{
+    border:1px solid var(--gold); outline:1px solid var(--line-soft); outline-offset:5px;
+    background:linear-gradient(180deg, rgba(180,154,91,.07), rgba(0,0,0,.18));
+    padding:38px 26px 30px; text-align:center; margin-bottom:26px;
+  }
+  .eyebrow{letter-spacing:.32em; font-size:.72rem; color:var(--gold2); text-transform:uppercase;}
+  .hero h1{font-size:clamp(2rem,5.4vw,3.4rem); font-weight:600; color:var(--ivory); margin:12px 0 6px; letter-spacing:.01em;}
+  .hero h1 em{color:var(--gold2); font-style:italic;}
+  .hero .tag{color:var(--muted); max-width:640px; margin:0 auto; font-size:1.02rem;}
+  .rule{width:120px; height:1px; background:var(--gold); margin:20px auto 0; position:relative;}
+  .rule::after{content:"◆"; position:absolute; left:50%; top:-9px; transform:translateX(-50%); color:var(--gold); font-size:.8rem; background:transparent;}
+  .stats{display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-top:26px;}
+  .stat{border:1px solid var(--line-soft); background:rgba(0,0,0,.22); padding:14px 10px;}
+  .stat .k{font-size:.68rem; letter-spacing:.18em; text-transform:uppercase; color:var(--muted);}
+  .stat .v{font-family:Georgia,serif; font-size:1.45rem; color:var(--gold2); margin-top:4px;}
+  .progress{margin-top:18px; text-align:left;}
+  .progress .lbl{font-size:.75rem; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); display:flex; justify-content:space-between;}
+  .bar{height:10px; background:#07130D; border:1px solid var(--line-soft); margin-top:6px;}
+  .bar > span{display:block; height:100%; background:linear-gradient(90deg,#8A713F,var(--gold2)); width:0%; transition:width .4s ease;}
+  /* ---------- cards & forms ---------- */
+  .card{border:1px solid var(--line); background:linear-gradient(180deg,var(--panel),var(--panel2)); padding:24px; margin-bottom:22px;}
+  .card h2{font-size:1.5rem; font-weight:600; color:var(--ivory); margin-bottom:4px;}
+  .card h2 .dia{color:var(--gold);}
+  .card .sub{color:var(--muted); font-size:.95rem; margin-bottom:18px; max-width:720px;}
+  .grid{display:grid; grid-template-columns:repeat(2,1fr); gap:16px;}
+  .grid3{display:grid; grid-template-columns:repeat(3,1fr); gap:16px;}
+  label.flabel{display:block; font-size:.72rem; letter-spacing:.16em; text-transform:uppercase; color:var(--gold2); margin-bottom:6px;}
+  .hint{font-size:.8rem; color:var(--muted); margin-top:5px;}
+  input[type=number],input[type=text],select{
+    width:100%; background:var(--ink); border:1px solid var(--line-soft); color:var(--ivory);
+    padding:11px 12px; font-size:1rem; border-radius:2px; font-family:inherit;
+  }
+  input:focus,select:focus{outline:none; border-color:var(--gold);}
+  input[type=range]{width:100%; accent-color:var(--gold); height:28px;}
+  input:disabled,select:disabled,button:disabled{opacity:.55; cursor:not-allowed;}
+  .big-out{font-family:Georgia,serif; font-size:1.8rem; color:var(--gold2);}
+  .out-row{display:flex; justify-content:space-between; align-items:baseline; border-top:1px solid var(--line-soft); padding:10px 0;}
+  .out-row .k{color:var(--muted); font-size:.9rem;}
+  .out-row .v{font-family:Georgia,serif; font-size:1.15rem; color:var(--ivory);}
+  .btn{
+    background:transparent; border:1px solid var(--gold); color:var(--gold2); padding:10px 18px;
+    font-size:.85rem; letter-spacing:.12em; text-transform:uppercase; cursor:pointer; border-radius:2px; font-family:inherit;
+  }
+  .btn:hover{background:rgba(180,154,91,.14);}
+  .btn.solid{background:var(--gold); color:#16241B; font-weight:700;}
+  .btn.small{padding:6px 12px; font-size:.75rem;}
+  .btnrow{display:flex; gap:10px; flex-wrap:wrap; margin-top:16px;}
+  /* debts */
+  .debt-head,.debt-row{display:grid; grid-template-columns:1.4fr 1fr .7fr .9fr 34px; gap:10px; align-items:end;}
+  .debt-head{font-size:.68rem; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); padding-bottom:6px;}
+  .debt-row{padding:8px 0; border-top:1px solid var(--line-soft);}
+  .debt-row .rm{background:none; border:1px solid var(--line-soft); color:var(--red); width:30px; height:38px; cursor:pointer; font-size:1rem; border-radius:2px;}
+  /* phases */
+  .phase{border:1px solid var(--line-soft); border-left:4px solid var(--gold); background:rgba(0,0,0,.18); padding:18px; margin-bottom:14px;}
+  .phase-head{display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:8px;}
+  .phase h3{font-size:1.25rem; color:var(--ivory); font-weight:600;}
+  .chip{border:1px solid var(--gold); color:var(--gold2); font-size:.7rem; letter-spacing:.16em; padding:3px 10px; text-transform:uppercase;}
+  .doctrine{color:var(--gold2); font-style:italic; font-family:Georgia,serif; margin:6px 0 4px;}
+  .phase .psum{color:var(--muted); font-size:.92rem; margin-bottom:10px;}
+  .check{list-style:none;}
+  .check li{padding:7px 0; border-top:1px solid rgba(180,154,91,.1);}
+  .check label{display:flex; gap:11px; align-items:flex-start; cursor:pointer; font-size:.95rem;}
+  .check input[type=checkbox]{width:19px; height:19px; accent-color:var(--gold); flex:none; margin-top:2px;}
+  .check .day{flex:none; font-size:.68rem; letter-spacing:.1em; color:#0E241A; background:var(--gold); padding:2px 7px; font-weight:700; margin-top:2px; min-width:52px; text-align:center;}
+  .check li.done span.txt{color:var(--muted); text-decoration:line-through;}
+  /* triage table */
+  table{width:100%; border-collapse:collapse; font-size:.95rem;}
+  th{font-size:.68rem; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); text-align:left; padding:8px 6px; border-bottom:1px solid var(--line);}
+  td{padding:10px 6px; border-bottom:1px solid var(--line-soft); vertical-align:top;}
+  td.num,th.num{text-align:right; font-variant-numeric:tabular-nums;}
+  .order-badge{display:inline-block; width:24px; height:24px; line-height:24px; text-align:center; border:1px solid var(--gold); color:var(--gold2); border-radius:50%; font-family:Georgia,serif; font-size:.85rem;}
+  /* allocation */
+  .slider-row{margin-bottom:16px;}
+  .slider-head{display:flex; justify-content:space-between; align-items:baseline;}
+  .slider-head .nm{font-family:Georgia,serif; font-size:1.05rem;}
+  .slider-head .amt{font-family:Georgia,serif; color:var(--gold2); font-size:1.1rem;}
+  .abar{height:12px; background:#07130D; border:1px solid var(--line-soft); margin-top:4px;}
+  .abar > span{display:block; height:100%; background:linear-gradient(90deg,#8A713F,var(--gold2)); width:0%; transition:width .3s ease;}
+  .warn{background:var(--redbg); border:1px solid #7C4436; color:#EFC4B8; padding:12px 14px; font-size:.92rem; margin-top:12px;}
+  .note{background:rgba(143,191,122,.08); border:1px solid rgba(143,191,122,.4); color:#CFE3C2; padding:12px 14px; font-size:.92rem; margin-top:12px;}
+  /* rules */
+  .rules{list-style:none; counter-reset:r;}
+  .rules li{counter-increment:r; padding:12px 0 12px 52px; position:relative; border-top:1px solid var(--line-soft); font-size:1rem;}
+  .rules li:first-child{border-top:none;}
+  .rules li::before{content:counter(r,upper-roman); position:absolute; left:0; top:10px; font-family:Georgia,serif; color:var(--gold2); font-size:1.05rem; width:38px; text-align:center; border-right:1px solid var(--line-soft); padding-right:10px;}
+  footer{color:var(--muted); font-size:.82rem; text-align:center; margin-top:30px;}
+  footer .disc{max-width:760px; margin:0 auto 12px; border:1px solid var(--line-soft); padding:14px; background:rgba(0,0,0,.2);}
+  .lock-note{font-size:.75rem; letter-spacing:.14em; text-transform:uppercase; color:var(--gold2); border:1px solid var(--line-soft); padding:3px 9px;}
+  @media (max-width:760px){
+    .stats{grid-template-columns:repeat(2,1fr);}
+    .grid,.grid3{grid-template-columns:1fr;}
+    .debt-head{display:none;}
+    .debt-row{grid-template-columns:1fr 1fr; }
+    .debt-row .rm{grid-column:2; justify-self:end;}
+    table{font-size:.85rem;}
+    .card{padding:18px;}
+  }
+</style>
+</head>
+<body>
+<div class="demo-banner">Demo — sample scenario · inputs locked · full version at thebullbrew.com</div>
+<div class="wrap">
+
+  <header class="hero">
+    <div class="eyebrow">The Bull Brew · Paid Edition</div>
+    <h1>The Windfall <em>Protocol</em></h1>
+    <p class="tag">Money landed in your lap — an inheritance, a bonus, a settlement, a sale. Most windfalls are gone in eighteen months. This is the 90-day command system that makes yours permanent: freeze it, shield it, kill the debt, then — and only then — put it to work.</p>
+    <div class="stats">
+      <div class="stat"><div class="k">Tax Set-Aside</div><div class="v" id="stSetAside">$0</div></div>
+      <div class="stat"><div class="k">Debt Eliminated</div><div class="v" id="stDebtKilled">$0</div></div>
+      <div class="stat"><div class="k">Interest Saved</div><div class="v" id="stInterestSaved">$0</div></div>
+      <div class="stat"><div class="k">Left to Allocate</div><div class="v" id="stPool">$0</div></div>
+    </div>
+    <div class="progress">
+      <div class="lbl"><span>Protocol checklist</span><span id="progLbl">0 of 0 complete</span></div>
+      <div class="bar"><span id="progBar"></span></div>
+    </div>
+    <div class="rule"></div>
+  </header>
+
+  <!-- 1 · THE WINDFALL -->
+  <section class="card" id="sec-windfall">
+    <h2><span class="dia">◆</span> I. The Windfall</h2>
+    <p class="sub">One number, one source, one honest tax estimate. Everything in the Protocol hangs off these three.</p>
+    <div class="grid3">
+      <div>
+        <label class="flabel" for="inAmount">Windfall amount ($)</label>
+        <input type="number" id="inAmount" min="0" step="100" inputmode="decimal">
+        <div class="hint">The gross figure, before tax. The Protocol works on what's real.</div>
+      </div>
+      <div>
+        <label class="flabel" for="inSource">Where it came from</label>
+        <select id="inSource">
+          <option value="inheritance">Inheritance</option>
+          <option value="bonus">Bonus / commission</option>
+          <option value="settlement">Legal settlement</option>
+          <option value="business">Business sale</option>
+          <option value="other">Other</option>
+        </select>
+        <div class="hint" id="sourceHint"></div>
+      </div>
+      <div>
+        <label class="flabel" for="inTaxPct">Tax set-aside (%)</label>
+        <input type="number" id="inTaxPct" min="0" max="60" step="0.5" inputmode="decimal">
+        <div class="hint">A planning estimate, not a tax return. Confirm with your CPA — see Phase II.</div>
+      </div>
+    </div>
+    <div style="margin-top:14px;">
+      <div class="out-row"><span class="k">Parked for taxes on Day 8</span><span class="v" id="outSetAside">$0</span></div>
+      <div class="out-row"><span class="k">Deployable after the set-aside</span><span class="v" id="outAfterTax">$0</span></div>
+    </div>
+  </section>
+
+  <!-- 2 · THE DEBTS -->
+  <section class="card" id="sec-debts">
+    <h2><span class="dia">◆</span> II. The Debts</h2>
+    <p class="sub">Every balance that's charging you rent for your own money. The Protocol pays them in avalanche order — highest APR first — because math doesn't care about your feelings.</p>
+    <div class="debt-head"><span>Debt name</span><span>Balance ($)</span><span>APR (%)</span><span>Minimum ($/mo)</span><span></span></div>
+    <div id="debtRows"></div>
+    <div class="btnrow full-only">
+      <button class="btn small" id="btnAddDebt" type="button">+ Add a debt</button>
+    </div>
+    <div style="margin-top:10px;">
+      <div class="out-row"><span class="k">Total debt on the table</span><span class="v" id="outDebtTotal">$0</span></div>
+      <div class="out-row"><span class="k">Combined minimums</span><span class="v" id="outDebtMin">$0 / mo</span></div>
+    </div>
+  </section>
+
+  <!-- 3 · YOUR GROUND -->
+  <section class="card" id="sec-ground">
+    <h2><span class="dia">◆</span> III. Your Ground</h2>
+    <p class="sub">The cushion comes before the portfolio. Tell the Protocol what a month of your life costs and what you've already got behind you.</p>
+    <div class="grid3">
+      <div>
+        <label class="flabel" for="inEssentials">Monthly essentials ($)</label>
+        <input type="number" id="inEssentials" min="0" step="50" inputmode="decimal">
+        <div class="hint">Housing, food, utilities, insurance, transport. The survival number, not the lifestyle number.</div>
+      </div>
+      <div>
+        <label class="flabel" for="inSavings">Savings you already have ($)</label>
+        <input type="number" id="inSavings" min="0" step="100" inputmode="decimal">
+        <div class="hint">Cash and near-cash only. Not the 401(k), not the house.</div>
+      </div>
+      <div>
+        <label class="flabel" for="inEfMonths">Emergency-fund target</label>
+        <select id="inEfMonths">
+          <option value="3">3 months</option>
+          <option value="6">6 months</option>
+          <option value="9">9 months</option>
+          <option value="12">12 months</option>
+        </select>
+        <div class="hint">Six is the house standard. Variable income? Take nine.</div>
+      </div>
+    </div>
+    <div style="margin-top:14px;">
+      <div class="out-row"><span class="k">Emergency-fund target</span><span class="v" id="outEfTarget">$0</span></div>
+      <div class="out-row"><span class="k">Still needed to fill it</span><span class="v" id="outEfGap">$0</span></div>
+    </div>
+  </section>
+
+  <!-- 4 · THE PROTOCOL -->
+  <section class="card" id="sec-protocol">
+    <h2><span class="dia">◆</span> IV. The 90-Day Protocol</h2>
+    <p class="sub">Four phases, in order, no skipping. Each phase unlocks the next. Check items off as you do them — in the full version, your progress is saved on this device.</p>
+    <div id="phases"></div>
+  </section>
+
+  <!-- 5 · TRIAGE -->
+  <section class="card" id="sec-triage">
+    <h2><span class="dia">◆</span> V. Debt Triage — The Kill Order</h2>
+    <p class="sub">Your debts, ranked by the damage they do. The lump lands on Day 31 in exactly this order; every freed minimum rolls into the next name on the list.</p>
+    <div id="triageBody"></div>
+  </section>
+
+  <!-- 6 · ALLOCATE -->
+  <section class="card" id="sec-alloc">
+    <h2><span class="dia">◆</span> VI. Allocate — Days 61 to 90</h2>
+    <p class="sub">What's left after taxes, debt, and the cushion gets its orders here. Slide the buckets; the guardrails will push back when you get greedy.</p>
+    <div class="out-row"><span class="k">Emergency-fund top-up (automatic, first)</span><span class="v" id="outEfTopUp">$0</span></div>
+    <div class="out-row"><span class="k">Allocation pool</span><span class="v" id="outPool">$0</span></div>
+    <div id="sliders" style="margin-top:18px;"></div>
+    <div id="allocMsgs"></div>
+  </section>
+
+  <!-- 7 · RULES -->
+  <section class="card">
+    <h2><span class="dia">◆</span> Rules of the Protocol</h2>
+    <p class="sub">Print them. Tape them to the fridge. They've saved more money than any stock tip ever will.</p>
+    <ol class="rules">
+      <li>Ninety days of boring beats nine days of thrilling — every single time.</li>
+      <li>The first job of new money is to stop being new. Park it somewhere dull.</li>
+      <li>Taxes get estimated early and confirmed once, in writing. The IRS does not accept vibes.</li>
+      <li>Double-digit APR is a fire. You don't invest around a fire — you put it out.</li>
+      <li>Fun money is capped at 5%. Fun is a line item, not a leak.</li>
+      <li>Nobody needs to know. The fastest way to halve a windfall is to announce it.</li>
+      <li>A freed payment is a soldier reassigned, never a soldier discharged. It rolls to the next fight.</li>
+    </ol>
+    <div class="btnrow full-only">
+      <button class="btn" id="btnExample" type="button">Reset to example</button>
+      <button class="btn" id="btnBlank" type="button">Start blank</button>
+    </div>
+  </section>
+
+  <div class="demo-close">
+    <h3 class="serif" style="font-size:1.4rem; margin-bottom:8px;">This was the sample. Yours is waiting.</h3>
+    <p style="color:var(--muted); max-width:620px; margin:0 auto 16px;">The full Windfall Protocol runs YOUR number — your debts in kill order, your interest saved to the dollar, and a live 90-day checklist that remembers where you left off. Sold as a one-time purchase at thebullbrew.com. No subscription. No account. The money stays yours; so does the plan.</p>
+    <a class="btn solid" href="https://www.thebullbrew.com" target="_blank" rel="noopener" style="display:inline-block; text-decoration:none;">Get the full version</a>
+  </div>
+
+  <footer>
+    <div class="disc">The Windfall Protocol is a planning and organization tool. It is not financial, tax, or legal advice, and it is not a substitute for a CPA, tax attorney, or licensed financial advisor. Tax set-aside percentages are rough planning estimates only — confirm your actual obligation before you file or spend. Debt projections assume fixed APRs and on-time minimum payments.</div>
+    <div>© The Bull Brew · The Windfall Protocol · Built to be used, not admired.</div>
+  </footer>
+</div>
+
+<script>
+"use strict";
+/* ================= mode ================= */
+const DEMO = true; // demo build flips this to true
+const LS_KEY = "windfallProtocol.v1";
+
+/* ================= helpers ================= */
+const $ = id => document.getElementById(id);
+const num = v => { const n = parseFloat(v); return isFinite(n) ? n : 0; };
+const money = n => "$" + Math.round(Math.max(0, n)).toLocaleString("en-US");
+const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+
+/* ================= sources ================= */
+const SOURCES = {
+  inheritance: { label: "Inheritance",        tax: 10, hint: "Inherited cash usually isn't income-taxed federally — but state inheritance tax and estate debts exist. 10% is a cautious buffer." },
+  bonus:       { label: "Bonus / commission", tax: 32, hint: "Bonuses are wages: federal withholding plus your bracket, state, and payroll tax on what's under the cap. 32% is the honest planning number for most earners." },
+  settlement:  { label: "Legal settlement",  tax: 25, hint: "Physical-injury settlements are often tax-free; punitive damages and interest usually aren't. 25% until your attorney says otherwise, in writing." },
+  business:    { label: "Business sale",     tax: 24, hint: "Mostly capital gains territory, plus state tax and possibly depreciation recapture. 24% is a middle-of-the-road planning figure." },
+  other:       { label: "Other",             tax: 20, hint: "Unknown source, unknown treatment. 20% parked is better than 0% parked and a letter from the IRS." }
+};
+
+/* ================= state ================= */
+const EXAMPLE = {
+  amount: 120000, source: "bonus", taxPct: 32,
+  essentials: 3400, savings: 6500, efMonths: 6,
+  debts: [
+    { name: "Credit card", balance: 8400,  apr: 24.99, min: 210 },
+    { name: "Auto loan",   balance: 14200, apr: 8.9,   min: 315 },
+    { name: "Store card",  balance: 1950,  apr: 29.99, min: 75  }
+  ],
+  sliders: { invest: 65, illiquid: 20, fun: 5, reserve: 10 },
+  checks: {}
+};
+const SAMPLE = {
+  amount: 250000, source: "inheritance", taxPct: 10,
+  essentials: 3850, savings: 5200, efMonths: 6,
+  debts: [
+    { name: "Visa card",     balance: 12600, apr: 26.99, min: 340 },
+    { name: "Store card",    balance: 3850,  apr: 29.99, min: 115 },
+    { name: "Auto loan",     balance: 18900, apr: 9.4,   min: 385 },
+    { name: "Personal loan", balance: 7200,  apr: 12.5,  min: 210 }
+  ],
+  sliders: { invest: 65, illiquid: 20, fun: 5, reserve: 10 },
+  checks: { f0: true, f1: true, f3: true, t0: true }
+};
+const BLANK = {
+  amount: "", source: "inheritance", taxPct: 10,
+  essentials: "", savings: "", efMonths: 6,
+  debts: [ { name: "", balance: "", apr: "", min: "" } ],
+  sliders: { invest: 65, illiquid: 20, fun: 5, reserve: 10 },
+  checks: {}
+};
+const clone = o => JSON.parse(JSON.stringify(o));
+
+let S;
+if (DEMO) { S = clone(SAMPLE); }
+else {
+  try { S = JSON.parse(localStorage.getItem(LS_KEY)) || clone(EXAMPLE); }
+  catch (e) { S = clone(EXAMPLE); }
+  if (!S.debts || !S.sliders) S = clone(EXAMPLE);
+}
+
+function save() { if (!DEMO) { try { localStorage.setItem(LS_KEY, JSON.stringify(S)); } catch (e) {} } }
+
+/* ================= math ================= */
+function cleanDebts() {
+  return S.debts
+    .map(d => ({ name: (d.name || "Debt").trim() || "Debt", balance: num(d.balance), apr: num(d.apr), min: num(d.min) }))
+    .filter(d => d.balance > 0);
+}
+
+/* Minimums only. Returns interest, months to debt-free (cap 1200) or null, and per-debt survival. */
+function simMinimums(debts) {
+  const ds = debts.map(d => ({ ...d, bal: d.balance }));
+  let interest = 0, months = 0;
+  const alive = () => ds.some(d => d.bal > 0.005);
+  while (alive() && months < 1200) {
+    months++;
+    for (const d of ds) {
+      if (d.bal <= 0.005) continue;
+      const i = d.bal * (d.apr / 100 / 12);
+      interest += i; d.bal += i;
+      d.bal -= Math.min(Math.max(d.min, 0), d.bal);
+      if (d.bal < 0.005) d.bal = 0;
+    }
+  }
+  return { interest, months, done: !alive(), remaining: ds.reduce((a, d) => a + d.bal, 0) };
+}
+
+/* The Protocol: Day-31 lump in avalanche order, then constant monthly budget
+   (all original minimums) rolled downhill until every debt is dead. */
+function simPlan(debts, lump) {
+  const ds = debts.map(d => ({ ...d, bal: d.balance, lumpApplied: 0, payoffMonth: null, interestPaid: 0 }))
+                   .sort((a, b) => b.apr - a.apr);
+  let rest = lump;
+  for (const d of ds) {
+    const pay = Math.min(d.bal, rest);
+    d.lumpApplied = pay; d.bal -= pay; rest -= pay;
+    if (d.bal <= 0.005) { d.bal = 0; d.payoffMonth = 0; }
+  }
+  let budget = debts.reduce((a, d) => a + Math.max(d.min, 0), 0);
+  const stillOwed = () => ds.reduce((a, d) => a + d.bal, 0);
+  if (budget <= 0 && stillOwed() > 0) budget = stillOwed() / 36;
+  let interest = 0, months = 0;
+  while (stillOwed() > 0.005 && months < 1200) {
+    months++;
+    for (const d of ds) {
+      if (d.bal <= 0.005) continue;
+      const i = d.bal * (d.apr / 100 / 12);
+      interest += i; d.interestPaid += i; d.bal += i;
+    }
+    let pool = budget;
+    for (const d of ds) {                       // minimums first
+      if (pool <= 0) break;
+      if (d.bal <= 0.005) continue;
+      const p = Math.min(Math.max(d.min, 0), d.bal, pool);
+      d.bal -= p; pool -= p;
+    }
+    for (const d of ds) {                       // rollover, highest APR first
+      if (pool <= 0) break;
+      if (d.bal <= 0.005) continue;
+      const p = Math.min(d.bal, pool);
+      d.bal -= p; pool -= p;
+    }
+    for (const d of ds) if (d.bal <= 0.005 && d.payoffMonth === null) { d.bal = 0; d.payoffMonth = months; }
+  }
+  return { order: ds, interest, months, lumpUsed: lump - rest, debtFree: stillOwed() <= 0.005 };
+}
+
+function compute() {
+  const amount = num(S.amount), taxPct = clamp(num(S.taxPct), 0, 60);
+  const setAside = amount * taxPct / 100;
+  const afterTax = Math.max(0, amount - setAside);
+  const debts = cleanDebts();
+  const debtTotal = debts.reduce((a, d) => a + d.balance, 0);
+  const debtMin = debts.reduce((a, d) => a + d.min, 0);
+  const plan = simPlan(debts, afterTax);
+  const debtPaid = plan.lumpUsed;                       // lump portion; rest dies on the monthly budget
+  const poolAfterDebt = Math.max(0, afterTax - debtPaid);
+  const efTarget = num(S.essentials) * num(S.efMonths);
+  const efGap = Math.max(0, efTarget - num(S.savings));
+  const efTopUp = Math.min(efGap, poolAfterDebt);
+  const pool = Math.max(0, poolAfterDebt - efTopUp);
+  const minOnly = simMinimums(debts);
+  let interestSaved = null, minWindow = null;
+  if (debts.length) {
+    if (minOnly.done) interestSaved = Math.max(0, minOnly.interest - plan.interest);
+    else { minWindow = simMinimumsCapped(debts, Math.max(plan.months, 12)); }
+  }
+  const purchaseCap = clamp(Math.round(amount * 0.002 / 50) * 50, 100, 1000);
+  return { amount, taxPct, setAside, afterTax, debts, debtTotal, debtMin, plan,
+           poolAfterDebt, efTarget, efGap, efTopUp, pool, minOnly, interestSaved, minWindow, purchaseCap };
+}
+function simMinimumsCapped(debts, capMonths) {
+  const ds = debts.map(d => ({ ...d, bal: d.balance }));
+  let interest = 0;
+  for (let m = 0; m < capMonths; m++) {
+    if (!ds.some(d => d.bal > 0.005)) break;
+    for (const d of ds) {
+      if (d.bal <= 0.005) continue;
+      const i = d.bal * (d.apr / 100 / 12);
+      interest += i; d.bal += i;
+      d.bal -= Math.min(Math.max(d.min, 0), d.bal);
+      if (d.bal < 0.005) d.bal = 0;
+    }
+  }
+  return interest;
+}
+
+/* ================= phases & checklist ================= */
+function debtFreeDate(months) {
+  const d = new Date(); d.setMonth(d.getMonth() + months);
+  return d.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+}
+function phases(c) {
+  const srcLabel = SOURCES[S.source] ? SOURCES[S.source].label : "windfall";
+  return [
+    { key: "f", name: "Phase I — Freeze", days: "Days 1–7",
+      doctrine: "Do nothing. Brilliantly, deliberately nothing.",
+      summary: "The money sits in a separate account earning a boring yield while your lizard brain calms down. Every disaster story starts with a purchase in week one.",
+      items: [
+        ["Day 1", "Move the money into a separate high-yield savings account — out of the account it landed in."],
+        ["Day 1", "Tell no one outside your household. Not family, not coworkers, not the group chat."],
+        ["Day 2", "Write the number down. Then write what it is not: it is not a raise, and it is not permission."],
+        ["Day 3", "No single purchase over " + money(c.purchaseCap) + " until Day 31. If it can't wait a month, it was never about the thing."],
+        ["Day 5", "List everyone who will eventually ask. Decide your one sentence now: “It's already allocated.”"],
+        ["Day 7", "Freeze review: balance untouched, list written, mouth shut. Week one survived."]
+      ]},
+    { key: "t", name: "Phase II — Tax & Shield", days: "Days 8–30",
+      doctrine: "Park the government's cut before it starts looking like yours.",
+      summary: "The set-aside leaves the room, the professionals get booked, and the paperwork moat gets dug — will, beneficiaries, insurance.",
+      items: [
+        ["Day 8", "Move " + money(c.setAside) + " — the " + c.taxPct + "% " + srcLabel.toLowerCase() + " set-aside — into its own account labeled “IRS — DO NOT TOUCH.”"],
+        ["Day 10", "Book the CPA call. Bring source documents, not opinions about brackets."],
+        ["Day 14", "Confirm the set-aside percentage against your real bracket. Adjust once, in writing."],
+        ["Day 18", "Shield review: umbrella insurance quoted, account beneficiaries current, will or trust updated."],
+        ["Day 24", S.source === "inheritance"
+            ? "Confirm probate is closed and no debts or claims ride along with this money."
+            : "Confirm no liens, clawbacks, or side agreements ride along with this money."],
+        ["Day 30", "Shield complete: taxes parked, papers in order. The money is boring now. Good."]
+      ]},
+    { key: "d", name: "Phase III — Debt Triage", days: "Days 31–60",
+      doctrine: "Avalanche. Highest rate first. No mercy, no exceptions.",
+      summary: c.debts.length
+        ? "On Day 31 the lump lands in kill order. " + money(c.plan.lumpUsed) + " goes out the door, " + (c.interestSaved !== null
+            ? "saving " + money(c.interestSaved) + " in interest versus minimums alone."
+            : "and every freed minimum rolls into the next debt until the list is dead.")
+        : "No debts on the table — this phase is a victory lap. The whole deployable amount rolls forward to allocation.",
+      items: [
+        ["Day 31", "Payoff day: send the lump in kill order — highest APR first. Save the confirmation screens."],
+        ["Day 33", "Call each paid-off creditor. Confirm a zero balance in writing. Keep old card accounts open; kill the spending habits, not the credit history."],
+        ["Day 40", "Redirect every freed minimum into the next debt on the list. A freed payment never becomes a lifestyle upgrade."],
+        ["Day 50", "Mid-triage audit: balances match the plan, and no new charges have appeared on cleared cards."],
+        ["Day 60", c.plan.debtFree && c.debts.length
+            ? "Triage complete. Debt-free date on this plan: " + debtFreeDate(c.plan.months) + ". Breathe."
+            : "Triage checkpoint: record what's left and the month it dies. The list only moves one direction now."]
+      ]},
+    { key: "a", name: "Phase IV — Allocate", days: "Days 61–90",
+      doctrine: "Cushion first, portfolio second, toys last — and capped.",
+      summary: "The emergency fund gets filled to " + num(S.efMonths) + " months before a single dollar is invested, and the fun money comes out with a number on it, not a leak.",
+      items: [
+        ["Day 61", "Top the emergency fund up by " + money(c.efTopUp) + " toward the " + money(c.efTarget) + " target. Before investing. No exceptions."],
+        ["Day 65", "Confirm the investment account: boring, diversified, automatic contributions on."],
+        ["Day 70", "Move the investing bucket in two or three tranches across the month — not one lump in a headline week."],
+        ["Day 78", "Take the fun money — capped at 5% of the windfall — and spend it on something memorable. Guilt-free. It was budgeted."],
+        ["Day 85", "Write your one-page money rules: what this windfall is FOR, in your own words, dated."],
+        ["Day 90", "Day-90 review. The money has jobs now. You're not “up this quarter” — you're funded. Different thing entirely."]
+      ]}
+  ];
+}
+
+/* ================= rendering ================= */
+function renderDebtRows() {
+  const host = $("debtRows");
+  host.innerHTML = S.debts.map((d, i) =>
+    '<div class="debt-row">' +
+      '<input type="text" data-i="' + i + '" data-f="name" placeholder="e.g. Credit card" value="' + String(d.name ?? "").replace(/"/g, "&quot;") + '">' +
+      '<input type="number" data-i="' + i + '" data-f="balance" min="0" step="50" placeholder="0" value="' + (d.balance ?? "") + '">' +
+      '<input type="number" data-i="' + i + '" data-f="apr" min="0" step="0.1" placeholder="0" value="' + (d.apr ?? "") + '">' +
+      '<input type="number" data-i="' + i + '" data-f="min" min="0" step="5" placeholder="0" value="' + (d.min ?? "") + '">' +
+      '<button type="button" class="rm" data-rm="' + i + '" title="Remove debt">×</button>' +
+    '</div>').join("");
+  if (DEMO) lockInputs();
+}
+
+const BUCKETS = [
+  { key: "invest",   name: "Long-term investing",  desc: "Diversified, boring, automatic. The bucket that makes the windfall permanent." },
+  { key: "illiquid", name: "Illiquid bets",        desc: "Real estate, a business, private deals. Money you cannot reach in a bad month." },
+  { key: "fun",      name: "Fun money",            desc: "Capped at 5% of the windfall. Memories, not payments." },
+  { key: "reserve",  name: "Extra cash reserve",   desc: "Stays parked in high-yield savings beyond the emergency fund." }
+];
+function renderSliders() {
+  $("sliders").innerHTML = BUCKETS.map(b =>
+    '<div class="slider-row">' +
+      '<div class="slider-head"><span class="nm">' + b.name + ' — <span id="pct-' + b.key + '">0%</span></span><span class="amt" id="amt-' + b.key + '">$0</span></div>' +
+      '<div class="hint">' + b.desc + '</div>' +
+      '<input type="range" min="0" max="100" step="1" value="' + num(S.sliders[b.key]) + '" data-bucket="' + b.key + '">' +
+      '<div class="abar"><span id="bar-' + b.key + '"></span></div>' +
+    '</div>').join("");
+  document.querySelectorAll("[data-bucket]").forEach(el =>
+    el.addEventListener("input", () => { S.sliders[el.dataset.bucket] = num(el.value); save(); renderOutputs(); }));
+  if (DEMO) lockInputs();
+}
+
+function renderPhases(c) {
+  const ph = phases(c);
+  $("phases").innerHTML = ph.map(p =>
+    '<div class="phase"><div class="phase-head"><h3>' + p.name + '</h3><span class="chip">' + p.days + '</span></div>' +
+    '<div class="doctrine">' + p.doctrine + '</div><p class="psum">' + p.summary + '</p>' +
+    '<ul class="check">' + p.items.map((it, idx) => {
+      const id = p.key + idx, on = !!S.checks[id];
+      return '<li class="' + (on ? "done" : "") + '"><label><input type="checkbox" data-check="' + id + '"' + (on ? " checked" : "") + '>' +
+        '<span class="day">' + it[0] + '</span><span class="txt">' + it[1] + "</span></label></li>";
+    }).join("") + "</ul></div>").join("");
+  document.querySelectorAll("[data-check]").forEach(el =>
+    el.addEventListener("change", () => {
+      S.checks[el.dataset.check] = el.checked; save();
+      el.closest("li").classList.toggle("done", el.checked);
+      renderProgress();
+    }));
+  if (DEMO) lockInputs();
+}
+
+function renderProgress() {
+  const total = phases(compute()).reduce((a, p) => a + p.items.length, 0);
+  const done = Object.values(S.checks).filter(Boolean).length;
+  $("progLbl").textContent = done + " of " + total + " complete";
+  $("progBar").style.width = (total ? (done / total * 100) : 0) + "%";
+}
+
+function renderTriage(c) {
+  const host = $("triageBody");
+  if (!c.debts.length) {
+    host.innerHTML = '<div class="note">No debts entered. The entire ' + money(c.afterTax) + ' deployable amount skips triage and goes straight to the cushion and the buckets. This is the position everyone else is trying to get to.</div>';
+    return;
+  }
+  const rows = c.plan.order.map((d, i) => {
+    const status = d.payoffMonth === 0 ? "Killed Day 31"
+      : (d.payoffMonth !== null ? "Dead month " + d.payoffMonth : "On the plan");
+    return "<tr><td><span class='order-badge'>" + (i + 1) + "</span></td>" +
+      "<td><strong>" + d.name + "</strong><br><span style='color:var(--muted); font-size:.82rem;'>" + status + "</span></td>" +
+      "<td class='num'>" + money(d.balance) + "</td><td class='num'>" + d.apr.toFixed(2) + "%</td>" +
+      "<td class='num'>" + money(d.lumpApplied) + "</td><td class='num'>" + money(d.interestPaid) + "</td></tr>";
+  }).join("");
+  let verdict;
+  if (c.interestSaved !== null) {
+    verdict = '<div class="note"><strong>The verdict:</strong> ' + money(c.plan.lumpUsed) + ' lands on Day 31 and the avalanche does the rest — debt-free in <strong>' +
+      c.plan.months + ' month' + (c.plan.months === 1 ? "" : "s") + '</strong> (' + debtFreeDate(c.plan.months) + '), saving <strong>' + money(c.interestSaved) +
+      '</strong> in interest versus paying minimums alone.</div>';
+  } else {
+    const span = c.plan.months > 0 ? "In the " + c.plan.months + " months the Protocol takes to finish" : "Across the first year alone";
+    verdict = '<div class="warn"><strong>Read this twice:</strong> on minimums alone, at least one of these debts <em>never dies</em> — the minimum doesn\'t cover the interest. ' +
+      span + ', minimums-only would burn ' + money(c.minWindow) + ' in interest. The Protocol burns ' + money(c.plan.interest) + '.</div>';
+  }
+  host.innerHTML = "<table><thead><tr><th></th><th>Debt</th><th class='num'>Balance</th><th class='num'>APR</th><th class='num'>Day-31 lump</th><th class='num'>Interest on plan</th></tr></thead><tbody>" +
+    rows + "</tbody></table>" + verdict;
+}
+
+function renderAlloc(c) {
+  const pool = c.pool;
+  const totalPct = BUCKETS.reduce((a, b) => a + num(S.sliders[b.key]), 0);
+  const funCapDollars = c.amount * 0.05;
+  let assigned = 0;
+  const msgs = [];
+  for (const b of BUCKETS) {
+    let pct = num(S.sliders[b.key]);
+    let amt = pool * pct / 100;
+    if (b.key === "fun" && amt > funCapDollars) {
+      amt = funCapDollars;
+      msgs.push('<div class="warn">Guardrail: fun money is capped at 5% of the windfall — ' + money(funCapDollars) + '. The Protocol has trimmed this bucket. Celebration is a line item, not a lifestyle.</div>');
+    }
+    assigned += amt;
+    $("pct-" + b.key).textContent = pct + "%";
+    $("amt-" + b.key).textContent = money(amt);
+    $("bar-" + b.key).style.width = clamp(pool > 0 ? amt / pool * 100 : 0, 0, 100) + "%";
+    if (b.key === "illiquid" && pool > 0 && amt / pool > 0.40)
+      msgs.push('<div class="warn">Guardrail: illiquid bets are over 40% of the pool. Money you can\'t reach in a bad month isn\'t a plan — it\'s a hope. Consider feeding the liquid bucket first.</div>');
+  }
+  if (c.efGap > c.efTopUp && c.efTopUp < c.efGap)
+    msgs.push('<div class="warn">The cushion is still ' + money(c.efGap - c.efTopUp) + ' short of target after this windfall does its work. These buckets are aspirational until the emergency fund is real — the next dollars in go to the cushion, not the market.</div>');
+  if (Math.abs(totalPct - 100) > 0.5 && pool > 0) {
+    const diff = pool - assigned;
+    msgs.push('<div class="note">Sliders total ' + totalPct + '%. ' + (diff > 0
+      ? money(diff) + ' of the pool is unassigned and stays parked in cash until you give it orders.'
+      : 'The buckets are over-assigned by ' + money(-diff) + ' — ease one back.') + '</div>');
+  }
+  $("allocMsgs").innerHTML = msgs.join("");
+  $("outEfTopUp").textContent = money(c.efTopUp) + (c.efGap > 0 && c.efTopUp >= c.efGap ? " — target reached" : "");
+  $("outPool").textContent = money(pool);
+  $("stPool").textContent = money(pool);
+}
+
+function renderOutputs() {
+  const c = compute();
+  $("stSetAside").textContent = money(c.setAside);
+  $("stDebtKilled").textContent = money(c.plan.lumpUsed);
+  $("stInterestSaved").textContent = c.interestSaved !== null ? money(c.interestSaved) : (c.debts.length ? "See triage" : "$0");
+  $("outSetAside").textContent = money(c.setAside);
+  $("outAfterTax").textContent = money(c.afterTax);
+  $("outDebtTotal").textContent = money(c.debtTotal);
+  $("outDebtMin").textContent = money(c.debtMin) + " / mo";
+  $("outEfTarget").textContent = money(c.efTarget);
+  $("outEfGap").textContent = money(c.efGap);
+  $("sourceHint").textContent = SOURCES[S.source] ? SOURCES[S.source].hint : "";
+  renderAlloc(c);
+  renderTriage(c);
+  renderPhases(c);
+  renderProgress();
+}
+
+/* ================= wiring ================= */
+function lockInputs() {
+  document.querySelectorAll("input, select, textarea, button").forEach(el => { el.disabled = true; });
+}
+function bindInputs() {
+  $("inAmount").value = S.amount; $("inSource").value = S.source; $("inTaxPct").value = S.taxPct;
+  $("inEssentials").value = S.essentials; $("inSavings").value = S.savings; $("inEfMonths").value = String(S.efMonths);
+  $("inAmount").addEventListener("input", e => { S.amount = e.target.value; save(); renderOutputs(); });
+  $("inTaxPct").addEventListener("input", e => { S.taxPct = e.target.value; save(); renderOutputs(); });
+  $("inEssentials").addEventListener("input", e => { S.essentials = e.target.value; save(); renderOutputs(); });
+  $("inSavings").addEventListener("input", e => { S.savings = e.target.value; save(); renderOutputs(); });
+  $("inEfMonths").addEventListener("change", e => { S.efMonths = num(e.target.value); save(); renderOutputs(); });
+  $("inSource").addEventListener("change", e => {
+    S.source = e.target.value;
+    S.taxPct = SOURCES[S.source].tax; $("inTaxPct").value = S.taxPct;
+    save(); renderOutputs();
+  });
+  $("debtRows").addEventListener("input", e => {
+    const i = num(e.target.dataset.i), f = e.target.dataset.f;
+    if (f) { S.debts[i][f] = e.target.value; save(); renderOutputs(); }
+  });
+  $("debtRows").addEventListener("click", e => {
+    const rm = e.target.dataset.rm;
+    if (rm !== undefined) { S.debts.splice(num(rm), 1); save(); renderDebtRows(); renderOutputs(); }
+  });
+  $("btnAddDebt").addEventListener("click", () => {
+    S.debts.push({ name: "", balance: "", apr: "", min: "" });
+    save(); renderDebtRows(); renderOutputs();
+  });
+  $("btnExample").addEventListener("click", () => { S = clone(EXAMPLE); save(); bindInputs(); renderDebtRows(); renderSliders(); renderOutputs(); });
+  $("btnBlank").addEventListener("click", () => { S = clone(BLANK); save(); bindInputs(); renderDebtRows(); renderSliders(); renderOutputs(); });
+}
+
+if (DEMO) document.body.classList.add("demo");
+bindInputs();
+renderDebtRows();
+renderSliders();
+renderOutputs();
+if (DEMO) lockInputs();
+
+if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) {
+  window.addEventListener("load", () => { navigator.serviceWorker.register("sw.js").catch(() => {}); });
+}
+</script>
+</body>
+</html>
